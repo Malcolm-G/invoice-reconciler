@@ -15,17 +15,17 @@ class Access:
 def live_access(entered_passcode: str = "", env: dict | None = None) -> Access:
     env = os.environ if env is None else env
     if not env.get("ANTHROPIC_API_KEY"):
-        return Access(False, "Live reading is not available: no API key is configured on this deployment.", False)
+        return Access(False, "Uploading your own file isn't switched on for this copy of the app.", False)
     if env.get("ALLOW_OPEN_LIVE") == "1":
         return Access(True, "", False)
     expected = env.get("APP_PASSCODE", "")
     if not expected:
-        return Access(False, "Live reading is switched off: no passcode is configured.", False)
+        return Access(False, "Uploading your own file isn't switched on for this copy of the app.", False)
     if not entered_passcode:
-        return Access(False, "Enter the passcode to use live reading.", True)
+        return Access(False, "Enter the passcode to upload your own file.", True)
     if hmac.compare_digest(entered_passcode.encode(), expected.encode()):
         return Access(True, "", True)
-    return Access(False, "Wrong passcode.", True)
+    return Access(False, "That passcode isn't right.", True)
 
 
 def session_budget_left(used_rows: int, wanted_rows: int, limit: int) -> bool:

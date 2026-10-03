@@ -27,26 +27,26 @@ def extract_row(client, raw: dict, period_start: str, period_end: str,
             output_format=RowExtraction,
         )
     except ValidationError:
-        return None, "Extraction failed validation."
+        return None, "Claude's answer for this row wasn't usable (wrong format)."
     except anthropic.RateLimitError:
-        return None, "Extraction failed: rate limited."
+        return None, "Claude couldn't read this row (too many requests)."
     except anthropic.APIConnectionError:
-        return None, "Extraction failed: could not reach the API."
+        return None, "Claude couldn't read this row (no connection)."
     except anthropic.APIStatusError as e:
-        return None, f"Extraction failed: API error {e.status_code}."
+        return None, f"Claude couldn't read this row (error {e.status_code})."
     except Exception as e:  # fail safe: nothing may escape the row it happened on
-        return None, f"Extraction failed: unexpected {type(e).__name__}."
+        return None, f"Claude couldn't read this row (unexpected {type(e).__name__})."
 
     ext = getattr(response, "parsed_output", None)
     if ext is None:
         reason = getattr(response, "stop_reason", None)
-        return None, f"Extraction failed: no valid output (stop reason: {reason})."
+        return None, f"Claude's answer for this row wasn't usable (stop reason: {reason})."
     try:
         ext = RowExtraction.model_validate(ext.model_dump())  # validate again, independent of the SDK
     except (ValidationError, AttributeError):
-        return None, "Extraction failed validation."
+        return None, "Claude's answer for this row wasn't usable (wrong format)."
     if ext.row_id != raw["row_id"]:
-        return None, "Extraction failed: row_id does not match the input row."
+        return None, "Claude's answer was for a different row."
     return ext, ""
 
 

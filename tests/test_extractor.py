@@ -69,13 +69,13 @@ def test_pydantic_validation_error_is_caught():
     except pydantic.ValidationError as e:
         boom = e
     ext, err = extract_row(FakeClient(boom), RAW, *P)
-    assert ext is None and "validation" in err
+    assert ext is None and "wasn't usable" in err
 
 
 def test_wrong_row_id_is_rejected():
     other = GOOD.model_copy(update={"row_id": 99})
     ext, err = extract_row(FakeClient(reply(other)), RAW, *P)
-    assert ext is None and "row_id" in err
+    assert ext is None and "different row" in err
 
 
 def test_api_errors_are_caught():
@@ -87,7 +87,7 @@ def test_api_errors_are_caught():
     ]
     for e in errors:
         ext, err = extract_row(FakeClient(e), RAW, *P)
-        assert ext is None and err.startswith("Extraction failed")
+        assert ext is None and err.startswith("Claude couldn't read")
 
 
 def test_failed_row_becomes_held_and_others_unaffected():
@@ -145,8 +145,9 @@ def test_cache_round_trip_and_banner(tmp_dataset):
     (tmp_dataset / "demo_cache.json").unlink(missing_ok=True)
     _record(ds)
     ex, source = resolve_extractions(ds)
-    assert source.kind == "cached" and "CACHED RESULTS" in source.banner and "test-model" in source.banner
-    assert "No API call is being made" in source.banner
+    assert source.kind == "cached" and "answers Claude gave earlier" in source.banner and "test-model" in source.banner
+    assert "Nothing is being read live" in source.banner
+    assert "cached" not in source.banner.lower()
     assert all(e is not None for e, _ in ex.values())
     assert build_invoice(ds, ex).draft_total == build_invoice(
         ds, load_fixture_extractions("synthetic", 15)).draft_total
@@ -171,7 +172,7 @@ def test_cache_miss_holds_the_row(tmp_dataset):
     _record(ds)
     ds.log_rows[0]["Service"] = "Push-back "  # data changed since recording
     ex, _ = resolve_extractions(ds)
-    assert ex[1][0] is None and "No cached result" in ex[1][1]
+    assert ex[1][0] is None and "No recorded answer" in ex[1][1]
     assert {l.row_id: l.tier for l in build_invoice(ds, ex).lines}[1] == Tier.held
 
 
@@ -199,4 +200,4 @@ def test_no_cache_falls_back_to_labelled_fixtures(tmp_dataset):
     ds = load_dataset("synthetic")
     (tmp_dataset / "demo_cache.json").unlink(missing_ok=True)
     _, source = resolve_extractions(ds)
-    assert source.kind == "fixture" and "NOT CLAUDE OUTPUT" in source.banner
+    assert source.kind == "fixture" and "written by hand" in source.banner

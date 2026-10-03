@@ -80,7 +80,7 @@ def price_row(raw: dict, ext: RowExtraction | None, ctx: Context,
     if duplicate_of is not None:
         line.tier = Tier.duplicate
         line.duplicate_of = duplicate_of
-        line.notes.append(f"Duplicate of row {duplicate_of}: every detail matches. Excluded.")
+        line.notes.append(f"Same as row {duplicate_of}, so counted once.")
         return line
 
     holds: list[HoldReason] = []
@@ -89,22 +89,22 @@ def price_row(raw: dict, ext: RowExtraction | None, ctx: Context,
     # --- Claude's output: validated or the row is held (fail safe) ---
     if ext is None:
         holds.append(HoldReason(Hold.EXTRACTION_INVALID,
-                                extraction_error or "No valid extraction for this row."))
+                                extraction_error or "No usable answer from Claude for this row."))
     else:
         bad = _mismatches(ext, d, year_missing, raw, leg, service, start, end, maps)
         if bad:
             holds.append(HoldReason(Hold.EXTRACTION_MISMATCH,
-                                    "Extractor and code read these fields differently: " + ", ".join(bad) + "."))
+                                    "Claude's reading and our own check disagree on: " + ", ".join(bad) + ". A person should confirm."))
         for f in ext.flags:
             if f.type in HOLDING_FLAGS:
-                holds.append(HoldReason(Hold.EXTRACTOR_FLAG, f"Flagged: {f.reason}"))
+                holds.append(HoldReason(Hold.EXTRACTOR_FLAG, f"Claude flagged this: {f.reason}"))
 
     # --- date ---
     assumption = None
     if d is None:
-        holds.append(HoldReason(Hold.DATE_UNRESOLVED, "Date could not be resolved to a day in the batch week."))
+        holds.append(HoldReason(Hold.DATE_UNRESOLVED, "The date couldn't be placed in the week covered."))
     elif year_missing:
-        assumption = (f"Year not in the log; taken as {d.year} from the batch week "
+        assumption = (f"No year in the log; assumed {d.year} from the week covered "
                       f"({ctx.period_start.isoformat()} to {ctx.period_end.isoformat()}).")
 
     # --- time sanity (any service) ---
@@ -125,12 +125,12 @@ def price_row(raw: dict, ext: RowExtraction | None, ctx: Context,
                                         "Start or end time is missing or unreadable, and the price depends on duration."))
             elif end <= start:
                 if not any(h.code == Hold.IMPOSSIBLE_TIME for h in holds):
-                    holds.append(HoldReason(Hold.IMPOSSIBLE_TIME, "Zero or negative duration on a pro-rata job."))
+                    holds.append(HoldReason(Hold.IMPOSSIBLE_TIME, "Start and end times give no duration, and the price depends on duration."))
             else:
                 minutes = end - start
                 amount = prorata_amount(rate, minutes)
                 per_min = rate.prorata_amount / Decimal(rate.per_minutes)
-                rate_applied = f"{minutes} min x AUD {per_min:.2f}/min (pro-rata per minute)"
+                rate_applied = f"{minutes} min at AUD {per_min:.2f} per minute"
                 notes.append("Pro-rata read as per minute; confirm with ops.")
         else:
             amount = rate.flat
@@ -142,15 +142,15 @@ def price_row(raw: dict, ext: RowExtraction | None, ctx: Context,
             for label, value, raw_value in (("Start", start, raw.get("Start")), ("End", end, raw.get("End"))):
                 if value is None:
                     shown = (raw_value or "").strip()
-                    what = f"{label} time '{shown}' could not be read" if shown else f"{label} time is missing"
-                    notes.append(f"{what}; not needed for a flat-rate price.")
+                    what = f"{label} time '{shown}' isn't a clear time" if shown else f"{label} time missing"
+                    notes.append(f"{what}. Doesn't affect the price.")
         if rate.category == "Any" and (category is None):
-            what = "is blank" if aircraft_blank else f"'{raw.get('Aircraft')}' is not recognised"
-            notes.append(f"Aircraft {what}; not needed (rate applies to any aircraft).")
+            what = "not given" if aircraft_blank else f"'{raw.get('Aircraft')}' not recognised"
+            notes.append(f"Aircraft {what}. Doesn't affect the price.")
         if rate.leg == "Any" and leg in ("ambiguous", "missing"):
-            notes.append("Transit/terminating unclear; not needed (rate applies to any).")
+            notes.append("Flight type unclear. Doesn't affect the price.")
         if rate.category != "Any" and cat and cat[1] == "assumed":
-            notes.append(f"Aircraft '{raw.get('Aircraft').strip()}' read as {cat[0]} via the mapping table (unverified).")
+            notes.append(f"Aircraft '{raw.get('Aircraft').strip()}' counted as {cat[0].lower()} (our assumption).")
 
     # --- the log's own note ---
     log_note = (raw.get("Notes") or "").strip()
@@ -162,9 +162,9 @@ def price_row(raw: dict, ext: RowExtraction | None, ctx: Context,
         if not ok:
             holds.append(HoldReason(Hold.NOTE_NEEDS_ATTENTION, f"Log note needs a person to read it: \"{log_note}\""))
         elif not holds:
-            notes.append(f"Log note \"{log_note}\" restates a gap that does not change the price.")
+            notes.append(f"Log note \"{log_note}\": doesn't affect the price.")
     elif ext is not None and ext.note_kind != NoteKind.none:
-        holds.append(HoldReason(Hold.EXTRACTION_MISMATCH, "Extractor reported a note that is not in the log."))
+        holds.append(HoldReason(Hold.EXTRACTION_MISMATCH, "Claude reported a note that isn't in the log."))
 
     # --- tier ---
     if holds:

@@ -1,6 +1,6 @@
 {
   "name": "synthetic",
-  "label": "SYNTHETIC DATA: invented flights, dates and rates for demonstration. Not real.",
+  "label": "Example data: made-up flights, dates and prices for demonstration. Nothing here is real.",
   "period_start": "2026-11-02",
   "period_end": "2026-11-08"
 }

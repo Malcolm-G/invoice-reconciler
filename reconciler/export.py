@@ -13,7 +13,7 @@ def _safe(text: str) -> str:
 def invoice_csv(inv: Invoice) -> str:
     out = io.StringIO()
     w = csv.writer(out, lineterminator="\n")
-    w.writerow(["row", "date", "flight", "service", "aircraft", "leg", "tier", "rate_applied",
+    w.writerow(["row", "date", "flight", "service", "aircraft", "flight_type", "line_status", "price_used",
                 "amount_aud", "notes", "held_reasons"])
     for l in inv.lines:
         w.writerow([

@@ -21,12 +21,12 @@ TEMPLATES: dict[Hold, str] = {
     Hold.DURATION_NEEDED: "The price depends on duration, but the start time (\"{start}\") or end time (\"{end}\") is missing or unreadable. What were the times?",
     Hold.DATE_UNRESOLVED: "The date \"{date}\" could not be placed in the batch week. What was the correct date?",
     Hold.NOTE_NEEDS_ATTENTION: "The log note says: \"{note}\". Does this change what should be billed for this line, and if so how?",
-    Hold.NO_RATE_SERVICE: "\"{service}\" is not on the rate card, so there is no agreed price. Is there an agreed price for it, and what is it?",
-    Hold.NO_RATE_LEG: "The rate card has no agreed price for {service} when logged as \"{leg}\". Is the logged transit/terminating value correct, and if so, is there an agreed price?",
-    Hold.RATE_UNUSABLE: "The rate card entry for {service} could not be read. What is the agreed rate?",
-    Hold.EXTRACTION_MISMATCH: "The automatic reading of this row disagrees with the plain check. {detail} Please confirm the correct values.",
-    Hold.EXTRACTION_INVALID: "The automatic reading of this row failed. Please check the row's values.",
-    Hold.EXTRACTOR_FLAG: "The automatic reader marked this row as uncertain. {detail} Please review the row.",
+    Hold.NO_RATE_SERVICE: "\"{service}\" is not on the price list, so there is no agreed price. Is there an agreed price for it, and what is it?",
+    Hold.NO_RATE_LEG: "The price list has no agreed price for {service} when logged as \"{leg}\". Is the logged transit/terminating value correct, and if so, is there an agreed price?",
+    Hold.RATE_UNUSABLE: "The price list entry for {service} could not be read. What is the agreed price?",
+    Hold.EXTRACTION_MISMATCH: "Please check this row. {detail}",
+    Hold.EXTRACTION_INVALID: "Claude couldn't read this row. Please check its values.",
+    Hold.EXTRACTOR_FLAG: "{detail} Please review the row.",
 }
 
 
@@ -36,7 +36,7 @@ class Question:
     owner: str
     text: str
     context: str      # "date | flight | service" for display
-    also_open: int    # number of other hold reasons on the same line
+    other_reasons: tuple[str, ...]   # other, genuinely different reasons the line is held
 
 
 def load_routing() -> dict[Hold, tuple[str, int]]:
@@ -67,9 +67,13 @@ def draft_questions(inv: Invoice) -> list[Question]:
         # The hold with the lowest priority number leads: facts from operations come before rate questions.
         lead = min(line.holds, key=lambda h: routing[h.code][1])
         owner = routing[lead.code][0]
+        # A Claude flag that merely repeats a problem the code already found is not a separate reason.
+        has_code_reason = any(h.code != Hold.EXTRACTOR_FLAG for h in line.holds)
+        others = tuple(h.text for h in line.holds
+                       if h is not lead and not (h.code == Hold.EXTRACTOR_FLAG and has_code_reason))
         text = _fill(TEMPLATES[lead.code], line, lead.text)
         context = " | ".join(filter(None, [(line.raw.get("Date") or "").strip(), line.flight, line.service]))
-        out.append(Question(line.row_id, owner, text, context, len(line.holds) - 1))
+        out.append(Question(line.row_id, owner, text, context, others))
     return out
 
 

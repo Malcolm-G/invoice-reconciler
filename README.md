@@ -11,14 +11,15 @@ Creates a draft invoice for human review from a messy job log and a price list. 
 - Plain-code normalisation: dates (read as DD/MM), strict times, aircraft/leg/service mapping tables in `data/mappings/`.
 - Exact-match rate lookup (service, aircraft category, leg). No nearest-rate fallback.
 - Per-line tiers: firm, assumed, held, duplicate.
-- Day-by-day draft invoice view, held items listed separately, three code-verified checks.
+- Day-by-day draft invoice view with the total and counts at the top, held lines listed separately, and a key explaining firm / assumed / held / duplicate for non-technical readers.
+- Three code-verified checks run on every invoice. They are not shown unless one fails (a plain red message appears and Approve stays disabled).
 
 ## Upload your own file
-Choose "Upload a file" in the sidebar. Upload a job log (`.csv` or `.xlsx`) and optionally a rate card. Claude reads each row live, then the same code-only pricing, tiering and checks produce the draft, which can be downloaded as CSV.
+"Upload a file" is the default view; a switch at the top of the page changes to "Demo dataset". The passcode (if one is required) is asked for first. Upload a job log (`.csv` or `.xlsx`) and optionally a price list. Claude reads each row live, then the same code-only pricing, tiering and checks produce the draft, which can be downloaded as CSV.
 - Templates for both files are downloadable in the app. Date and Service columns are required; at most 50 rows per upload.
 - Values are read as text, exactly as exported. Excel date and time cells become plain text; an Excel time stored as a bare fraction cannot be recovered and holds the line.
-- Pick the batch week (used only to read dates that have no year).
-- With no rate card uploaded, a banner says the synthetic demo prices are in use.
+- Pick the week covered (used only to read dates that have no year).
+- With no price list uploaded, a banner says the example prices are in use.
 - Uploaded rows go to the Anthropic API so Claude can read them. The app does not store them, and uploads are never written to the cache files.
 
 ## Hosted deployment and secrets
@@ -29,7 +30,7 @@ The public demo needs no secrets: it replays the cached synthetic results. To en
 Controls: the row cap per upload (`MAX_UPLOAD_ROWS`, default 50) and a per-session limit on live row reads (`MAX_LIVE_ROWS_PER_SESSION`, default 150). `ALLOW_OPEN_LIVE=1` skips the passcode and is for a local `.env` only; the "Re-record" button also needs it, so it never appears on a hosted app. The passcode is a simple gate, not a full login system, and there is no attempt throttling.
 
 ## Exceptions and approval
-- **Exceptions tab:** one drafted question per held line, written from fixed templates keyed on why the line is held (no Claude involved). Questions are grouped by owner using a routing table, `data/mappings/routing.csv`. **The routing is an assumption** about who would answer; confirm it with the business. The lines stay held until a person confirms them. What happens if nobody answers is out of scope: the open items stay listed.
+- **Questions tab:** one drafted question per held line, written from fixed templates keyed on why the line is held (no Claude involved). Questions are grouped by owner using a routing table, `data/mappings/routing.csv`. **The routing is an assumption** about who would answer; confirm it with the business. The lines stay held until a person confirms them. What happens if nobody answers is out of scope: the open items stay listed.
 - **Approval tab:** the app only creates drafts. Entering an approver's name and pressing Approve records a status in the app session (name and time). It does not do anything else. Approval needs a name and all three checks passing, covers only the firm and assumed total, and lapses back to DRAFT if the invoice changes. The status is not saved between sessions.
 
 ## Not built

@@ -25,7 +25,7 @@ _LOG_ALIASES = {
 _RATE_ALIASES = {
     "service": "Service", "aircraftcategory": "Aircraft Category", "category": "Aircraft Category",
     "transit/terminator": "Transit / Terminator", "transit/term": "Transit / Terminator",
-    "rate(aud)": "Rate (AUD)", "rate": "Rate (AUD)",
+    "rate(aud)": "Rate (AUD)", "rate": "Rate (AUD)", "price(aud)": "Rate (AUD)", "price": "Rate (AUD)",
 }
 
 
@@ -122,9 +122,9 @@ def parse_log(filename: str, data: bytes, max_rows: int | None = None) -> Parsed
 
 
 def parse_rate_card(filename: str, data: bytes) -> Parsed:
-    parsed = _parse(filename, data, _RATE_ALIASES, RATE_COLUMNS, RATE_COLUMNS, 200, "rate card")
+    parsed = _parse(filename, data, _RATE_ALIASES, RATE_COLUMNS, RATE_COLUMNS, 200, "price list")
     if not parsed.rows:
-        raise UploadError("The rate card file has a header but no rows.")
+        raise UploadError("The price list file has a header but no rows.")
     return parsed
 
 

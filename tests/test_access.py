@@ -17,13 +17,13 @@ def test_no_key_means_no_live_use():
 
 def test_key_without_passcode_fails_closed():
     a = live_access("", env=KEY)
-    assert not a.allowed and "switched off" in a.reason
+    assert not a.allowed and "isn't switched on" in a.reason
 
 
 def test_passcode_required_and_checked():
     env = {**KEY, "APP_PASSCODE": "letmein"}
     assert live_access("", env=env).needs_passcode and not live_access("", env=env).allowed
-    assert live_access("wrong", env=env).reason == "Wrong passcode."
+    assert live_access("wrong", env=env).reason == "That passcode isn't right."
     assert live_access("letmein", env=env).allowed
 
 

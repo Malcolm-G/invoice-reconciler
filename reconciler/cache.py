@@ -53,13 +53,13 @@ def load_cache(dataset: str, rows: list[dict], period_start: str, period_end: st
     for raw in rows:
         entry = entries.get(row_key(raw, period_start, period_end))
         if entry is None:
-            out[raw["row_id"]] = (None, "No cached result for this row (data or prompt changed since recording).")
+            out[raw["row_id"]] = (None, "No recorded answer for this row (the data or instructions changed since it was recorded).")
             continue
         try:
             ext = RowExtraction.model_validate(entry)
-            out[raw["row_id"]] = (ext, "") if ext.row_id == raw["row_id"] else (None, "Cached result is for a different row.")
+            out[raw["row_id"]] = (ext, "") if ext.row_id == raw["row_id"] else (None, "The recorded answer is for a different row.")
         except ValidationError:
-            out[raw["row_id"]] = (None, "Cached result failed validation.")
+            out[raw["row_id"]] = (None, "The recorded answer for this row wasn't usable.")
     return out, info
 
 

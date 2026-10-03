@@ -14,7 +14,7 @@ def test_recorded_synthetic_cache_replays_to_expected_invoice(monkeypatch):
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     ds = load_dataset("synthetic")
     extractions, source = resolve_extractions(ds)
-    assert source.kind == "cached" and "CACHED RESULTS" in source.banner
+    assert source.kind == "cached" and "answers Claude gave earlier" in source.banner
     inv = build_invoice(ds, extractions)
     assert inv.draft_total == Decimal("1332.00")
     assert inv.tier_counts[Tier.duplicate] == 1 and inv.tier_counts[Tier.held] == 7

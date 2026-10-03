@@ -23,7 +23,7 @@ def load_fixture_extractions(dataset: str, n_rows: int) -> dict[int, tuple[RowEx
             out[int(rid)] = (RowExtraction.model_validate(item), "")
         except (ValidationError, TypeError, ValueError):
             if isinstance(rid, int):
-                out[rid] = (None, "Extraction failed validation.")
+                out[rid] = (None, "Claude's answer for this row wasn't usable (wrong format).")
     for rid in range(1, n_rows + 1):
-        out.setdefault(rid, (None, "No extraction available for this row."))
+        out.setdefault(rid, (None, "No answer from Claude for this row."))
     return out

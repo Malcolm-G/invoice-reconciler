@@ -60,7 +60,16 @@ def test_operations_questions_lead_over_rate_questions():
     from reconciler.models import HoldReason
     line.holds.append(HoldReason(Hold.AMBIGUOUS_LEG, "extra"))
     q = next(q for q in draft_questions(inv) if q.row_id == 10)
-    assert q.owner == "Operations" and q.also_open == 1
+    assert q.owner == "Operations" and q.other_reasons == ("No agreed price for this service on a terminating flight.",)
+
+
+def test_a_claude_flag_that_repeats_a_code_finding_is_not_listed_as_another_reason():
+    inv = synthetic_invoice()
+    for rid in (11, 12, 13):                    # each has a code finding plus a Claude flag saying the same thing
+        line = next(l for l in inv.held if l.row_id == rid)
+        assert {h.code for h in line.holds} >= {Hold.EXTRACTOR_FLAG}
+        q = next(q for q in draft_questions(inv) if q.row_id == rid)
+        assert q.other_reasons == ()
 
 
 def test_every_template_fills_without_error_on_awkward_rows():
@@ -133,10 +142,84 @@ def test_no_sending_language_in_ui_or_readme():
 
 # ---------------- UI flow ----------------
 
-def test_ui_approval_flow(monkeypatch):
-    monkeypatch.setenv("DATASET", "synthetic")
+def fresh_app(monkeypatch, **env):
     monkeypatch.setattr(config, "load_dotenv", lambda: None)
-    at = AppTest.from_file(str(config.ROOT / "app.py")).run(timeout=60)
+    for k in ("ANTHROPIC_API_KEY", "APP_PASSCODE", "ALLOW_OPEN_LIVE"):
+        monkeypatch.delenv(k, raising=False)
+    monkeypatch.setenv("DATASET", "synthetic")
+    for k, v in env.items():
+        monkeypatch.setenv(k, v)
+    return AppTest.from_file(str(config.ROOT / "app.py"))
+
+
+def demo_app(monkeypatch):
+    at = fresh_app(monkeypatch).run(timeout=60)
+    at.segmented_control(key="source_choice").set_value("Demo dataset").run(timeout=60)
+    return at
+
+
+def test_upload_is_the_default_view_with_a_note(monkeypatch):
+    at = fresh_app(monkeypatch, ANTHROPIC_API_KEY="k", APP_PASSCODE="pw").run(timeout=60)
+    assert not at.exception
+    assert at.segmented_control(key="source_choice").value == "Upload a file"
+    assert any("Have the passcode?" in i.value and "Demo dataset" in i.value for i in at.info)
+    assert [t.label for t in at.text_input] == ["Passcode"]          # the passcode comes first
+    assert not at.file_uploader                                       # nothing to upload until it is entered
+
+
+def test_without_a_passcode_the_visitor_is_pointed_to_the_demo(monkeypatch):
+    at = fresh_app(monkeypatch, ANTHROPIC_API_KEY="k").run(timeout=60)    # key but no passcode: switched off
+    assert any("isn't switched on" in i.value and "Demo dataset" in i.value for i in at.info)
+    assert not at.file_uploader and not at.text_input
+
+
+def test_wrong_passcode_stays_locked_right_passcode_opens_upload(monkeypatch):
+    at = fresh_app(monkeypatch, ANTHROPIC_API_KEY="k", APP_PASSCODE="pw").run(timeout=60)
+    at.text_input[0].input("nope").run(timeout=60)
+    assert any("isn't right" in i.value for i in at.info) and not at.file_uploader
+    at.text_input[0].input("pw").run(timeout=60)
+    assert not at.exception and len(at.file_uploader) == 2
+
+
+def test_the_key_explaining_the_words_is_shown_in_demo_view(monkeypatch):
+    at = demo_app(monkeypatch)
+    text = " ".join(m.value for m in at.markdown)
+    for word in ("Firm", "Assumed", "Held", "Duplicate", "How to read this invoice"):
+        assert word in text
+
+
+def test_demo_banner_is_plain_language(monkeypatch):
+    at = demo_app(monkeypatch)
+    banners = " ".join(i.value for i in at.info)
+    assert "answers Claude gave earlier" in banners and "Nothing is being read live" in banners
+    assert "cached" not in (banners + " ".join(w.value for w in at.warning)).lower()
+    assert "prompt" not in banners.lower() and "API" not in banners
+
+
+def test_no_checks_section_when_all_checks_pass(monkeypatch):
+    at = demo_app(monkeypatch)
+    assert not any("Code-verified" in s.value for s in at.subheader)
+    assert not any("PASS" in s.value for s in at.success)
+    assert not at.error
+
+
+def test_a_failed_check_shows_one_plain_message_and_blocks_approval(monkeypatch):
+    from reconciler import checks as checks_module
+    monkeypatch.setattr(checks_module, "run_checks",
+                        lambda inv: [Check("Lines sum to the draft total", False, "off by 1"), Check("b", True, ""), Check("c", True, "")])
+    at = demo_app(monkeypatch)
+    assert any("doesn't add up" in e.value for e in at.error)
+    at.text_input(key="approver_name").input("Sam Lee").run(timeout=60)
+    assert next(b for b in at.button if b.label == "Approve draft").disabled
+
+
+def test_total_is_shown_first(monkeypatch):
+    at = demo_app(monkeypatch)
+    labels = {m.label: m.value for m in at.metric}
+    assert labels["Draft total"] == "AUD 1,332.00" and labels["Held lines"] == "7"
+
+def test_ui_approval_flow(monkeypatch):
+    at = demo_app(monkeypatch)
     assert not at.exception
     assert any("DRAFT" in w.value for w in at.warning)
     approve_btn = next(b for b in at.button if b.label == "Approve draft")
@@ -152,8 +235,6 @@ def test_ui_approval_flow(monkeypatch):
 
 
 def test_ui_exceptions_tab_lists_owners(monkeypatch):
-    monkeypatch.setenv("DATASET", "synthetic")
-    monkeypatch.setattr(config, "load_dotenv", lambda: None)
-    at = AppTest.from_file(str(config.ROOT / "app.py")).run(timeout=60)
+    at = demo_app(monkeypatch)
     assert any("ASSUMPTION" in w.value for w in at.warning)
-    assert any("Open items (7)" in s.value for s in at.subheader)
+    assert any("Questions to answer (7)" in s.value for s in at.subheader)

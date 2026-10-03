@@ -66,7 +66,7 @@ def test_same_flight_other_day_is_not_a_duplicate(inv):
 
 def test_gaps_that_do_not_change_price_are_noted_not_held(inv):
     line = next(l for l in inv.lines if l.row_id == 5)
-    assert line.tier == Tier.firm and any("End time is missing" in n for n in line.notes)
+    assert line.tier == Tier.firm and any("End time missing" in n for n in line.notes)
 
 
 def test_day_subtotals_sum_to_total(inv):

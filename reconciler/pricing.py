@@ -78,29 +78,29 @@ def find_rate(rates: list[RateEntry], service: str | None, category: str | None,
               leg: str, aircraft_blank: bool) -> Lookup:
     """Exact match on (service, category, leg). Returns a rate or the reason there is none."""
     if not service or not any(r.service == service for r in rates):
-        return Lookup(None, HoldReason(Hold.NO_RATE_SERVICE, "Service is not on the rate card: no agreed price."))
+        return Lookup(None, HoldReason(Hold.NO_RATE_SERVICE, "Not on the price list, so there is no agreed price."))
     rows = [r for r in rates if r.service == service]
     matches = [r for r in rows if r.category in ("Any", category) and r.leg in ("Any", leg)]
     if len(matches) == 1:
         if not matches[0].usable:
-            return Lookup(None, HoldReason(Hold.RATE_UNUSABLE, "The rate card entry could not be read."))
+            return Lookup(None, HoldReason(Hold.RATE_UNUSABLE, "The price list entry could not be read."))
         return Lookup(matches[0], None)
     if len(matches) > 1:
-        return Lookup(None, HoldReason(Hold.RATE_UNUSABLE, "More than one rate matches; cannot choose."))
+        return Lookup(None, HoldReason(Hold.RATE_UNUSABLE, "More than one price matches; cannot choose."))
     # No match: say which field blocked it.
     cat_ok = [r for r in rows if r.category in ("Any", category)]
     if leg in ("ambiguous", "missing") and cat_ok:
         if leg == "ambiguous":
-            return Lookup(None, HoldReason(Hold.AMBIGUOUS_LEG, "Transit/terminating is ambiguous as logged, and the rate depends on it."))
-        return Lookup(None, HoldReason(Hold.MISSING_LEG, "Transit/terminating is missing, and the rate depends on it."))
+            return Lookup(None, HoldReason(Hold.AMBIGUOUS_LEG, "The log says 'T', which could mean transit or terminating, and the price depends on which."))
+        return Lookup(None, HoldReason(Hold.MISSING_LEG, "Flight type (transit or terminating) is missing, and the price depends on it."))
     leg_ok = [r for r in rows if r.leg in ("Any", leg)]
     if category is None and leg_ok:
         if aircraft_blank:
-            return Lookup(None, HoldReason(Hold.MISSING_AIRCRAFT, "Aircraft type is missing, and the rate depends on it."))
-        return Lookup(None, HoldReason(Hold.UNKNOWN_AIRCRAFT, "Aircraft code is not recognised, and the rate depends on it."))
+            return Lookup(None, HoldReason(Hold.MISSING_AIRCRAFT, "Aircraft type is missing, and the price depends on it."))
+        return Lookup(None, HoldReason(Hold.UNKNOWN_AIRCRAFT, "Aircraft type isn't recognised, and the price depends on it."))
     if leg == "originating":
         return Lookup(None, HoldReason(Hold.NO_RATE_LEG, "Originating flights have no agreed price for this service."))
-    return Lookup(None, HoldReason(Hold.NO_RATE_LEG, f"No agreed rate for this service with leg type '{leg}'."))
+    return Lookup(None, HoldReason(Hold.NO_RATE_LEG, f"No agreed price for this service on a {leg} flight."))
 
 
 def prorata_amount(rate: RateEntry, minutes: int) -> Decimal:

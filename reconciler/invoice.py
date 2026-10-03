@@ -50,7 +50,7 @@ def build_invoice(ds: Dataset, extractions: Extractions) -> Invoice:
 
     lines = []
     for raw in ds.log_rows:
-        ext, err = extractions.get(raw["row_id"], (None, "No extraction available for this row."))
+        ext, err = extractions.get(raw["row_id"], (None, "No answer from Claude for this row."))
         lines.append(price_row(raw, ext, ctx, duplicate_of=dups.get(raw["row_id"]), extraction_error=err))
 
     billed = [l for l in lines if l.tier in BILLED_TIERS]
