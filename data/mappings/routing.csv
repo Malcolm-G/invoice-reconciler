@@ -1,0 +1,15 @@
+hold_code,owner,priority
+AMBIGUOUS_LEG,Operations,1
+MISSING_LEG,Operations,2
+UNKNOWN_AIRCRAFT,Operations,3
+MISSING_AIRCRAFT,Operations,4
+IMPOSSIBLE_TIME,Operations,5
+DURATION_NEEDED,Operations,6
+DATE_UNRESOLVED,Operations,7
+NOTE_NEEDS_ATTENTION,Operations,8
+NO_RATE_SERVICE,Rates and contracts,9
+NO_RATE_LEG,Rates and contracts,10
+RATE_UNUSABLE,Rates and contracts,11
+EXTRACTION_MISMATCH,Data review,12
+EXTRACTION_INVALID,Data review,13
+EXTRACTOR_FLAG,Data review,14

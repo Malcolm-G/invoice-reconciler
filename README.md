@@ -1,6 +1,6 @@
 # Invoice Reconciler
 
-**Status: prototype.** The pipeline runs end to end: Claude reads and flags each log row, and plain code prices, tiers and totals the result into a draft invoice. Not built yet: the exceptions queue and the approval gate.
+**Status: prototype.** The pipeline runs end to end: Claude reads and flags each log row, and plain code prices, tiers and totals the result into a draft invoice. It also drafts questions for held lines and has an in-app approval gate.
 
 Creates a draft invoice for human review from a messy job log and a price list. The design rule: Claude reads and flags rows; plain code does every lookup and calculation. Claude's output schema has no price or total fields.
 
@@ -19,7 +19,7 @@ Choose "Upload a file" in the sidebar. Upload a job log (`.csv` or `.xlsx`) and 
 - Values are read as text, exactly as exported. Excel date and time cells become plain text; an Excel time stored as a bare fraction cannot be recovered and holds the line.
 - Pick the batch week (used only to read dates that have no year).
 - With no rate card uploaded, a banner says the synthetic demo prices are in use.
-- Uploaded rows are sent to the Anthropic API. The app does not store them, and uploads are never written to the cache files.
+- Uploaded rows go to the Anthropic API so Claude can read them. The app does not store them, and uploads are never written to the cache files.
 
 ## Hosted deployment and secrets
 The public demo needs no secrets: it replays the cached synthetic results. To enable uploads on a hosted copy, add these in the host's secrets settings (never in the repo):
@@ -28,8 +28,12 @@ The public demo needs no secrets: it replays the cached synthetic results. To en
 
 Controls: the row cap per upload (`MAX_UPLOAD_ROWS`, default 50) and a per-session limit on live row reads (`MAX_LIVE_ROWS_PER_SESSION`, default 150). `ALLOW_OPEN_LIVE=1` skips the passcode and is for a local `.env` only; the "Re-record" button also needs it, so it never appears on a hosted app. The passcode is a simple gate, not a full login system, and there is no attempt throttling.
 
-## What does not exist yet
-Exceptions queue (questions per held line, grouped by owner) and the approval gate.
+## Exceptions and approval
+- **Exceptions tab:** one drafted question per held line, written from fixed templates keyed on why the line is held (no Claude involved). Questions are grouped by owner using a routing table, `data/mappings/routing.csv`. **The routing is an assumption** about who would answer; confirm it with the business. The lines stay held until a person confirms them. What happens if nobody answers is out of scope: the open items stay listed.
+- **Approval tab:** the app only creates drafts. Entering an approver's name and pressing Approve records a status in the app session (name and time). It does not do anything else. Approval needs a name and all three checks passing, covers only the firm and assumed total, and lapses back to DRAFT if the invoice changes. The status is not saved between sessions.
+
+## Not built
+Persistence of approvals, and any handling of unanswered questions.
 
 ## Trust boundary
 Code reads every field from the raw text itself and compares it with Claude's reading. Any disagreement holds the line. Claude can only add caution (flags); it cannot lower a hold code found, and it never sets an amount. A log note passes only if Claude says it just restates a gap and code independently sees that gap.

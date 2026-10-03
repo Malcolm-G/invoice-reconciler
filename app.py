@@ -7,7 +7,7 @@ import pandas as pd
 import streamlit as st
 
 import config
-from invoice_view import render_invoice
+from invoice_view import render_approval, render_exceptions, render_invoice, render_status
 from reconciler.access import live_access, session_budget_left
 from reconciler.checks import run_checks
 from reconciler.invoice import build_invoice
@@ -60,9 +60,15 @@ if source_choice != "Upload a file":
                 st.rerun()
 
     inv = build_invoice(ds, extractions)
-    tab_inv, tab_raw = st.tabs(["Invoice", "Raw data"])
+    checks = run_checks(inv)
+    render_status(inv)
+    tab_inv, tab_exc, tab_appr, tab_raw = st.tabs(["Invoice", "Exceptions", "Approval", "Raw data"])
     with tab_inv:
-        render_invoice(inv, run_checks(inv), f"draft_invoice_{ds.name}.csv")
+        render_invoice(inv, checks, f"draft_invoice_{ds.name}.csv")
+    with tab_exc:
+        render_exceptions(inv)
+    with tab_appr:
+        render_approval(inv, checks)
     with tab_raw:
         c1, c2 = st.columns(2)
         c1.metric("Job log rows", len(ds.log_rows))
@@ -74,8 +80,8 @@ if source_choice != "Upload a file":
 
 else:
     # ---------------- upload a file (live Claude reading) ----------------
-    st.warning("UPLOAD MODE. Rows you upload are sent to the Anthropic API so Claude can read them. "
-               "This app does not store them. Only upload data you are allowed to send.", icon=":material/upload:")
+    st.warning("UPLOAD MODE. Rows you upload go to the Anthropic API so Claude can read them. "
+               "This app does not store them. Only upload data you are allowed to share this way.", icon=":material/upload:")
 
     demo_dir = config.dataset_dir("synthetic")
     with st.expander("Expected file format and templates"):
@@ -135,7 +141,7 @@ else:
     n_rows = len(log.rows)
     left = config.MAX_LIVE_ROWS_PER_SESSION - st.session_state.live_rows_used
     st.caption(f"{n_rows} rows to read. This session has {max(left, 0)} live row reads left.")
-    agreed = st.checkbox("I am allowed to send this data to the Anthropic API.")
+    agreed = st.checkbox("I am allowed to share this data with the Anthropic API.")
 
     run_key = hashlib.sha256(repr((log_file.getvalue(), p_start, p_end, model)).encode()).hexdigest()
     if st.button("Read with Claude and build the draft", type="primary", disabled=not agreed):
@@ -159,11 +165,17 @@ else:
                  period_start=p_start.isoformat(), period_end=p_end.isoformat(),
                  log_rows=log.rows, rate_rows=rate_rows)
     st.info(f"LIVE RESULTS. Read just now by {run['model']}. Not cached or stored by this app. "
-            "Rows were sent to the Anthropic API.", icon=":material/bolt:")
+            "Rows went to the Anthropic API.", icon=":material/bolt:")
     inv = build_invoice(ds, run["extractions"])
-    tab_inv, tab_raw = st.tabs(["Invoice", "Raw data"])
+    checks = run_checks(inv)
+    render_status(inv)
+    tab_inv, tab_exc, tab_appr, tab_raw = st.tabs(["Invoice", "Exceptions", "Approval", "Raw data"])
     with tab_inv:
-        render_invoice(inv, run_checks(inv), "draft_invoice_upload.csv")
+        render_invoice(inv, checks, "draft_invoice_upload.csv")
+    with tab_exc:
+        render_exceptions(inv)
+    with tab_appr:
+        render_approval(inv, checks)
     with tab_raw:
         st.markdown("**Job log (raw, as uploaded)**")
         st.dataframe(pd.DataFrame(log.rows).set_index("row_id"), alt="Uploaded job log rows")
