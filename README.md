@@ -13,6 +13,21 @@ Creates a draft invoice for human review from a messy job log and a price list. 
 - Per-line tiers: firm, assumed, held, duplicate.
 - Day-by-day draft invoice view, held items listed separately, three code-verified checks.
 
+## Upload your own file
+Choose "Upload a file" in the sidebar. Upload a job log (`.csv` or `.xlsx`) and optionally a rate card. Claude reads each row live, then the same code-only pricing, tiering and checks produce the draft, which can be downloaded as CSV.
+- Templates for both files are downloadable in the app. Date and Service columns are required; at most 50 rows per upload.
+- Values are read as text, exactly as exported. Excel date and time cells become plain text; an Excel time stored as a bare fraction cannot be recovered and holds the line.
+- Pick the batch week (used only to read dates that have no year).
+- With no rate card uploaded, a banner says the synthetic demo prices are in use.
+- Uploaded rows are sent to the Anthropic API. The app does not store them, and uploads are never written to the cache files.
+
+## Hosted deployment and secrets
+The public demo needs no secrets: it replays the cached synthetic results. To enable uploads on a hosted copy, add these in the host's secrets settings (never in the repo):
+- `ANTHROPIC_API_KEY`
+- `APP_PASSCODE` (live reading is refused unless the visitor enters it; with a key but no passcode it stays switched off)
+
+Controls: the row cap per upload (`MAX_UPLOAD_ROWS`, default 50) and a per-session limit on live row reads (`MAX_LIVE_ROWS_PER_SESSION`, default 150). `ALLOW_OPEN_LIVE=1` skips the passcode and is for a local `.env` only; the "Re-record" button also needs it, so it never appears on a hosted app. The passcode is a simple gate, not a full login system, and there is no attempt throttling.
+
 ## What does not exist yet
 Exceptions queue (questions per held line, grouped by owner) and the approval gate.
 

@@ -4,6 +4,8 @@ Uses the Anthropic SDK's structured-output helper (messages.parse with a Pydanti
 model). The result is validated again here: a refusal, a cut-off reply, invalid
 output or an API error all become (None, reason), which tiering turns into a held row.
 """
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 import anthropic
 from pydantic import ValidationError
 
@@ -32,6 +34,8 @@ def extract_row(client, raw: dict, period_start: str, period_end: str,
         return None, "Extraction failed: could not reach the API."
     except anthropic.APIStatusError as e:
         return None, f"Extraction failed: API error {e.status_code}."
+    except Exception as e:  # fail safe: nothing may escape the row it happened on
+        return None, f"Extraction failed: unexpected {type(e).__name__}."
 
     ext = getattr(response, "parsed_output", None)
     if ext is None:
@@ -47,7 +51,17 @@ def extract_row(client, raw: dict, period_start: str, period_end: str,
 
 
 def run_live(rows: list[dict], period_start: str, period_end: str,
-             model: str | None = None, client=None) -> dict[int, Extraction]:
-    """Call Claude once per row. Needs ANTHROPIC_API_KEY in the environment."""
+             model: str | None = None, client=None, workers: int = 4,
+             on_progress=None) -> dict[int, Extraction]:
+    """Call Claude once per row (a few at a time). Needs ANTHROPIC_API_KEY in the environment.
+    on_progress(done, total) is called as rows finish."""
     client = client or anthropic.Anthropic()  # reads ANTHROPIC_API_KEY; never hard-coded
-    return {raw["row_id"]: extract_row(client, raw, period_start, period_end, model) for raw in rows}
+    results: dict[int, Extraction] = {}
+    with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
+        futures = {pool.submit(extract_row, client, raw, period_start, period_end, model): raw["row_id"]
+                   for raw in rows}
+        for done, fut in enumerate(as_completed(futures), start=1):
+            results[futures[fut]] = fut.result()
+            if on_progress:
+                on_progress(done, len(rows))
+    return {raw["row_id"]: results[raw["row_id"]] for raw in rows}  # original row order
