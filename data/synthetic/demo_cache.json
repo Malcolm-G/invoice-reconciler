@@ -1,0 +1,241 @@
+{
+ "model": "claude-haiku-4-5",
+ "prompt_version": "v4",
+ "recorded_at": "2026-10-03 17:53 UTC",
+ "rows": {
+  "b07ea86734b3889db6cc4257": {
+   "row_id": 1,
+   "date_iso": "2026-11-03",
+   "date_year_missing": false,
+   "flight": "XA201",
+   "aircraft_as_logged": "B737",
+   "leg_type": "transit",
+   "service_as_logged": "Push-back",
+   "start_time": "07:00",
+   "end_time": "07:12",
+   "note_kind": "none",
+   "note_summary": null,
+   "flags": []
+  },
+  "ddc51f140624300e3a047a20": {
+   "row_id": 2,
+   "date_iso": "2026-11-03",
+   "date_year_missing": false,
+   "flight": "XB310",
+   "aircraft_as_logged": "A330",
+   "leg_type": "terminating",
+   "service_as_logged": "Baggage Handling",
+   "start_time": "08:15",
+   "end_time": "09:00",
+   "note_kind": "none",
+   "note_summary": null,
+   "flags": []
+  },
+  "8168fd7afad0ad4f5ce2a0ff": {
+   "row_id": 3,
+   "date_iso": "2026-11-03",
+   "date_year_missing": false,
+   "flight": "XB310",
+   "aircraft_as_logged": "A330",
+   "leg_type": "terminating",
+   "service_as_logged": "Baggage Handling",
+   "start_time": "08:15",
+   "end_time": "09:00",
+   "note_kind": "none",
+   "note_summary": null,
+   "flags": []
+  },
+  "3827810ea5bca25696c71a76": {
+   "row_id": 4,
+   "date_iso": "2026-11-03",
+   "date_year_missing": true,
+   "flight": "XC415",
+   "aircraft_as_logged": "A320",
+   "leg_type": "terminating",
+   "service_as_logged": "Cabin Clean",
+   "start_time": "10:00",
+   "end_time": "10:25",
+   "note_kind": "none",
+   "note_summary": null,
+   "flags": []
+  },
+  "9c868a4a316e13dfb5e3107f": {
+   "row_id": 5,
+   "date_iso": "2026-11-04",
+   "date_year_missing": false,
+   "flight": "XA201",
+   "aircraft_as_logged": "B737",
+   "leg_type": "transit",
+   "service_as_logged": "Push back",
+   "start_time": "07:05",
+   "end_time": null,
+   "note_kind": "none",
+   "note_summary": null,
+   "flags": [
+    {
+     "type": "missing_value",
+     "reason": "End time is blank.",
+     "assumption": null
+    }
+   ]
+  },
+  "c4572de0726dfd3cd9998401": {
+   "row_id": 6,
+   "date_iso": "2026-11-04",
+   "date_year_missing": false,
+   "flight": "XC420",
+   "aircraft_as_logged": "E190",
+   "leg_type": "terminating",
+   "service_as_logged": "Cabin Clean",
+   "start_time": "09:00",
+   "end_time": "09:30",
+   "note_kind": "none",
+   "note_summary": null,
+   "flags": []
+  },
+  "d85fa2f91c102731c49bfc9b": {
+   "row_id": 7,
+   "date_iso": "2026-11-04",
+   "date_year_missing": false,
+   "flight": "XD500",
+   "aircraft_as_logged": "A320",
+   "leg_type": "originating",
+   "service_as_logged": "Cabin Clean",
+   "start_time": "06:00",
+   "end_time": "06:40",
+   "note_kind": "none",
+   "note_summary": null,
+   "flags": []
+  },
+  "0d2a75f7c8b91ca74ecb1509": {
+   "row_id": 8,
+   "date_iso": "2026-11-05",
+   "date_year_missing": false,
+   "flight": "XB311",
+   "aircraft_as_logged": "320",
+   "leg_type": "terminating",
+   "service_as_logged": "Baggage Handling",
+   "start_time": "11:00",
+   "end_time": "11:30",
+   "note_kind": "none",
+   "note_summary": null,
+   "flags": []
+  },
+  "c59f24bac8525bea01ed427f": {
+   "row_id": 9,
+   "date_iso": "2026-11-05",
+   "date_year_missing": false,
+   "flight": "XA202",
+   "aircraft_as_logged": "B737",
+   "leg_type": "terminating",
+   "service_as_logged": "De-icing",
+   "start_time": "05:10",
+   "end_time": "05:48",
+   "note_kind": "none",
+   "note_summary": null,
+   "flags": []
+  },
+  "1b38acc1aa35ea4c79ce045b": {
+   "row_id": 10,
+   "date_iso": "2026-11-05",
+   "date_year_missing": false,
+   "flight": "XA202",
+   "aircraft_as_logged": "B737",
+   "leg_type": "terminating",
+   "service_as_logged": "Water/Waste",
+   "start_time": "06:00",
+   "end_time": "06:10",
+   "note_kind": "none",
+   "note_summary": null,
+   "flags": []
+  },
+  "f635e11e474c51bff8845eba": {
+   "row_id": 11,
+   "date_iso": "2026-11-06",
+   "date_year_missing": false,
+   "flight": "XD501",
+   "aircraft_as_logged": "A330",
+   "leg_type": "transit",
+   "service_as_logged": "GPU",
+   "start_time": "14:00",
+   "end_time": "13:20",
+   "note_kind": "none",
+   "note_summary": null,
+   "flags": [
+    {
+     "type": "impossible_time_range",
+     "reason": "End time 13:20 is earlier than start time 14:00 on the same day.",
+     "assumption": null
+    }
+   ]
+  },
+  "67ca6c02502688a7074b2d7b": {
+   "row_id": 12,
+   "date_iso": "2026-11-06",
+   "date_year_missing": false,
+   "flight": "XC421",
+   "aircraft_as_logged": "A320",
+   "leg_type": "ambiguous",
+   "service_as_logged": "Baggage Handling",
+   "start_time": "08:00",
+   "end_time": "08:30",
+   "note_kind": "none",
+   "note_summary": null,
+   "flags": [
+    {
+     "type": "ambiguous_abbreviation",
+     "reason": "The leg_type field contains only 'T', which is an abbreviation; the full word 'transit' or 'terminating' is not present.",
+     "assumption": null
+    }
+   ]
+  },
+  "ed02bfdec6f61a1fba7fa37b": {
+   "row_id": 13,
+   "date_iso": "2026-11-06",
+   "date_year_missing": false,
+   "flight": "XC421",
+   "aircraft_as_logged": "A320",
+   "leg_type": "terminating",
+   "service_as_logged": "Cabin Clean",
+   "start_time": "08:40",
+   "end_time": "09:05",
+   "note_kind": "aircraft_change",
+   "note_summary": "Aircraft was swapped; verification requested.",
+   "flags": [
+    {
+     "type": "note_needs_attention",
+     "reason": "The note reports an aircraft change and requests confirmation.",
+     "assumption": null
+    }
+   ]
+  },
+  "9f70dedccfefe7de39d293d8": {
+   "row_id": 14,
+   "date_iso": "2026-11-06",
+   "date_year_missing": false,
+   "flight": "XD502",
+   "aircraft_as_logged": "B787",
+   "leg_type": "transit",
+   "service_as_logged": "Push-back",
+   "start_time": "15:00",
+   "end_time": "15:14",
+   "note_kind": "none",
+   "note_summary": null,
+   "flags": []
+  },
+  "a5769a9ca2c870541d7d4aa6": {
+   "row_id": 15,
+   "date_iso": "2026-11-06",
+   "date_year_missing": false,
+   "flight": "XD503",
+   "aircraft_as_logged": "A320",
+   "leg_type": "terminating",
+   "service_as_logged": "Lav Service",
+   "start_time": "15:00",
+   "end_time": "15:10",
+   "note_kind": "restates_unpriced",
+   "note_summary": "Service not on rate card.",
+   "flags": []
+  }
+ }
+}

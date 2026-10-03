@@ -1,0 +1,10 @@
+Service,Aircraft Category,Transit / Terminator,Rate (AUD)
+Push-back,Narrowbody,Transit,150
+Push-back,Widebody,Transit,240
+Baggage Handling,Narrowbody,Terminator,200
+Baggage Handling,Widebody,Terminator,310
+Cabin Clean,Narrowbody,Terminator,130
+Cabin Clean,Widebody,Terminator,190
+Water/Waste Service,Any,Transit,80
+Ground Power Unit (GPU),Any,Transit,55
+De-icing,Any,Any,60 per 15 min (pro-rata)

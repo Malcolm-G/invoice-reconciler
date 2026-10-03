@@ -1,0 +1,12 @@
+code,category,status
+737,Narrowbody,verified
+B737,Narrowbody,verified
+Boeing 737,Narrowbody,verified
+738,Narrowbody,verified
+A320,Narrowbody,verified
+320,Narrowbody,assumed
+A330,Widebody,verified
+330,Widebody,assumed
+Widebody 330,Widebody,verified
+B787,Widebody,verified
+787,Widebody,assumed

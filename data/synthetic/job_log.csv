@@ -1,0 +1,16 @@
+Date,Flight,Aircraft,Transit/Term,Service,Start,End,Notes
+03/11/2026,XA201,B737,Transit,Push-back,07:00,07:12,
+2026-11-03,XB310,A330,Terminator,Baggage Handling,8:15am,9:00am,
+03/11/2026,XB310,A330,Terminator,Baggage Handling,8:15am,9:00am,
+03-Nov,XC415,A320,Terminator,Cabin Clean,10:00,10:25,
+04/11/2026,XA201,B737,transit,Push back,07:05,,
+04/11/2026,XC420,E190,Terminator,Cabin Clean,09:00,09:30,
+04/11/2026,XD500,A320,Originating,Cabin Clean,06:00,06:40,
+05/11/26,XB311,320,Terminator,Baggage Handling,11:00,11:30,
+05/11/2026,XA202,B737,Terminator,De-icing,05:10,05:48,
+05/11/2026,XA202,B737,Terminator,Water/Waste,06:00,06:10,
+06/11/2026,XD501,A330,Transit,GPU,14:00,13:20,
+06/11/2026,XC421,A320,T,Baggage Handling,08:00,08:30,
+06/11/2026,XC421,A320,Terminator,Cabin Clean,08:40,09:05,"swapped to a different aircraft, please check"
+06/11/2026,XD502,B787,Transit,Push-back,15:00,15:14,
+06/11/2026,XD503,A320,Terminator,Lav Service,15:00,15:10,not on rate card

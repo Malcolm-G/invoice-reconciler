@@ -1,0 +1,25 @@
+# Secrets
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Source documents are never committed
+*.pdf
+data/raw/
+
+# SAMPLE DATA NEVER ENTERS GIT. This covers the sample CSVs, the sample
+# dataset config, and the sample demo cache (one cache file per dataset
+# lives inside that dataset's folder).
+data/sample/
+
+# Tests and fixtures derived from the sample data (they skip cleanly when absent)
+tests_private/
+
+# Editor / OS
+.vscode/
+.DS_Store
+Thumbs.db
