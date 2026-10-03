@@ -102,7 +102,10 @@ def render_results(inv: Invoice, checks, download_name: str, show_original) -> N
     render_status(inv)
     render_check_warning(checks)
     render_key()
-    tab_inv, tab_q, tab_appr, tab_orig = st.tabs(["Invoice", "Questions", "Approval", "Original data"])
+    # Tracked tabs (key + on_change) keep the chosen tab open when the page reruns, for example
+    # after typing the approver's name. Untracked tabs jump back to the first one.
+    tab_inv, tab_q, tab_appr, tab_orig = st.tabs(["Invoice", "Questions", "Approval", "Original data"],
+                                                 key="results_tabs", on_change="rerun")
     with tab_inv:
         render_invoice(inv, download_name)
     with tab_q:

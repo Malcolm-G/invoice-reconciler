@@ -162,7 +162,7 @@ def test_upload_is_the_default_view_with_a_note(monkeypatch):
     at = fresh_app(monkeypatch, ANTHROPIC_API_KEY="k", APP_PASSCODE="pw").run(timeout=60)
     assert not at.exception
     assert at.segmented_control(key="source_choice").value == "Upload a file"
-    assert any("Have the passcode?" in i.value and "Demo dataset" in i.value for i in at.info)
+    assert any("passcode is on the CV" in i.value and "Demo dataset" in i.value for i in at.info)
     assert [t.label for t in at.text_input] == ["Passcode"]          # the passcode comes first
     assert not at.file_uploader                                       # nothing to upload until it is entered
 
@@ -179,6 +179,16 @@ def test_wrong_passcode_stays_locked_right_passcode_opens_upload(monkeypatch):
     assert any("isn't right" in i.value for i in at.info) and not at.file_uploader
     at.text_input[0].input("pw").run(timeout=60)
     assert not at.exception and len(at.file_uploader) == 2
+
+
+def test_the_open_tab_is_tracked_so_typing_a_name_does_not_switch_tabs(monkeypatch):
+    at = demo_app(monkeypatch)
+    # tracked tabs keep the open tab in session state under this key, so it survives reruns
+    assert "results_tabs" in at.session_state
+    at.session_state["results_tabs"] = "Approval"          # the visitor opened the Approval tab
+    at.text_input(key="approver_name").input("Sam Lee").run(timeout=60)
+    assert not at.exception
+    assert at.session_state["results_tabs"] == "Approval"
 
 
 def test_the_key_explaining_the_words_is_shown_in_demo_view(monkeypatch):

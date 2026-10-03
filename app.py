@@ -34,11 +34,11 @@ choice = st.segmented_control("Choose a view", ["Upload a file", "Demo dataset"]
 upload_mode = choice != "Demo dataset"   # upload is the default; deselecting falls back to it
 
 if upload_mode:
-    st.info("Have the passcode? Upload your own job log below. "
-            "No passcode? Switch to “Demo dataset” above to see an example.")
+    st.info("The passcode is on the CV. Enter it below to upload your own job log, "
+            "or switch to “Demo dataset” above to see an example first.")
 else:
     st.info("This is an example using made-up flights, dates and prices. To try your own file, "
-            "switch to “Upload a file” above (a passcode is needed).")
+            "switch to “Upload a file” above (the passcode is on the CV).")
 
 if not upload_mode:
     # ---------------- demo dataset (answers Claude gave earlier) ----------------

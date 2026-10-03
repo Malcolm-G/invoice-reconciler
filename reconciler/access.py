@@ -22,7 +22,7 @@ def live_access(entered_passcode: str = "", env: dict | None = None) -> Access:
     if not expected:
         return Access(False, "Uploading your own file isn't switched on for this copy of the app.", False)
     if not entered_passcode:
-        return Access(False, "Enter the passcode to upload your own file.", True)
+        return Access(False, "Enter the passcode (it's on the CV) to upload your own file.", True)
     if hmac.compare_digest(entered_passcode.encode(), expected.encode()):
         return Access(True, "", True)
     return Access(False, "That passcode isn't right.", True)
