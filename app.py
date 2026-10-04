@@ -82,7 +82,8 @@ else:
     passcode = st.text_input("Passcode", type="password") if live_access("").needs_passcode else ""
     access = live_access(passcode)
     if not access.allowed:
-        st.info(access.reason + " Or switch to “Demo dataset” above to see an example.")
+        if passcode or not access.needs_passcode:     # the note at the top already asks for the passcode
+            st.info(access.reason + " Or switch to “Demo dataset” above to see an example.")
         st.stop()
 
     st.warning("Your file is read by Claude, an AI model from Anthropic, so its contents are shared with "

@@ -165,6 +165,7 @@ def test_upload_is_the_default_view_with_a_note(monkeypatch):
     assert any("passcode is on the CV" in i.value and "Demo dataset" in i.value for i in at.info)
     assert [t.label for t in at.text_input] == ["Passcode"]          # the passcode comes first
     assert not at.file_uploader                                       # nothing to upload until it is entered
+    assert sum("passcode" in i.value.lower() for i in at.info) == 1  # the passcode is asked for once, not twice
 
 
 def test_without_a_passcode_the_visitor_is_pointed_to_the_demo(monkeypatch):
