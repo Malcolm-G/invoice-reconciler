@@ -175,6 +175,7 @@ def price_row(raw: dict, ext: RowExtraction | None, ctx: Context,
     line.tier = Tier.assumed if assumption else Tier.firm
     line.assumption = assumption
     line.amount = amount
+    line.rate_category = rate.category if rate is not None else ""
     line.rate_applied = rate_applied
     line.notes = notes
     return line

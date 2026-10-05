@@ -136,3 +136,5 @@ class PricedLine:
     assumption: str | None = None                          # shown on assumed lines
     holds: list[HoldReason] = field(default_factory=list)
     duplicate_of: int | None = None
+    rate_category: str = ""                               # the price list's aircraft category for the price used
+    indicative: str = ""                                  # held lines only: a rough cost, shown on the PDF, never totalled

@@ -4,6 +4,7 @@ from datetime import date
 from decimal import Decimal
 
 from reconciler.duplicates import find_duplicates
+from reconciler.indicative import indicative_text
 from reconciler.loader import Dataset
 from reconciler.models import PricedLine, RowExtraction, Tier
 from reconciler.normalise import load_mappings
@@ -52,6 +53,10 @@ def build_invoice(ds: Dataset, extractions: Extractions) -> Invoice:
     for raw in ds.log_rows:
         ext, err = extractions.get(raw["row_id"], (None, "No answer from Claude for this row."))
         lines.append(price_row(raw, ext, ctx, duplicate_of=dups.get(raw["row_id"]), extraction_error=err))
+
+    for l in lines:
+        if l.tier == Tier.held:
+            l.indicative = indicative_text(l, ctx)      # display only: never part of any total
 
     billed = [l for l in lines if l.tier in BILLED_TIERS]
     by_day: dict[date | None, list[PricedLine]] = {}

@@ -3,4 +3,6 @@ pydantic>=2
 streamlit
 pandas
 openpyxl
+reportlab
+pypdf
 pytest

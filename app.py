@@ -75,7 +75,8 @@ if not upload_mode:
         st.markdown("**Price list, exactly as provided**")
         st.dataframe(pd.DataFrame(ds.rate_rows), alt="Price list rows as provided")
 
-    render_results(inv, run_checks(inv), f"draft_invoice_{ds.name}.csv", show_original)
+    render_results(inv, run_checks(inv), f"draft_invoice_{ds.name}.csv", show_original,
+                   period=(ds.period_start, ds.period_end))
 
 else:
     # ---------------- upload a file (Claude reads it live) ----------------
@@ -174,4 +175,4 @@ else:
         st.markdown("**Price list in use**")
         st.dataframe(pd.DataFrame(rate_rows), alt="Price list in use")
 
-    render_results(inv, run_checks(inv), "draft_invoice_upload.csv", show_original)
+    render_results(inv, run_checks(inv), "draft_invoice_upload.csv", show_original, period=(p_start, p_end))

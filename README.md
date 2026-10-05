@@ -15,7 +15,8 @@ Creates a draft invoice for human review from a messy job log and a price list. 
 - Three code-verified checks run on every invoice. They are not shown unless one fails (a plain red message appears and Approve stays disabled).
 
 ## Upload your own file
-"Upload a file" is the default view; a switch at the top of the page changes to "Demo dataset". The passcode (if one is required) is asked for first. Upload a job log (`.csv` or `.xlsx`) and optionally a price list. Claude reads each row live, then the same code-only pricing, tiering and checks produce the draft, which can be downloaded as CSV.
+"Upload a file" is the default view; a switch at the top of the page changes to "Demo dataset". The passcode (if one is required) is asked for first. Upload a job log (`.csv` or `.xlsx`) and optionally a price list. Claude reads each row live, then the same code-only pricing, tiering and checks produce the draft, which can be downloaded as a PDF or as CSV.
+- The PDF shows the draft total, a day-by-day table, the held lines with who is waiting on what and a rough indicative price, and an approval line. It is drawn by plain code (ReportLab) from the same figures as the page, never by Claude. The indicative price is for reading only and is never part of a total. Text from the log is drawn as plain text.
 - Templates for both files are downloadable in the app. Date and Service columns are required; at most 50 rows per upload.
 - Values are read as text, exactly as exported. Excel date and time cells become plain text; an Excel time stored as a bare fraction cannot be recovered and holds the line.
 - Pick the week covered (used only to read dates that have no year).

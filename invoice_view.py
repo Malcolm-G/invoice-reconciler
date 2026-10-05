@@ -9,6 +9,7 @@ from reconciler.exceptions import draft_questions, group_by_owner
 from reconciler.export import invoice_csv
 from reconciler.invoice import Invoice
 from reconciler.models import Tier
+from reconciler.pdf_export import invoice_pdf
 
 
 def aud(x) -> str:
@@ -97,7 +98,7 @@ def render_approval(inv: Invoice, checks) -> None:
         st.rerun()
 
 
-def render_results(inv: Invoice, checks, download_name: str, show_original) -> None:
+def render_results(inv: Invoice, checks, download_name: str, show_original, period=None) -> None:
     """The whole results page: status, key, then the four tabs. show_original draws the Original data tab."""
     render_status(inv)
     render_check_warning(checks)
@@ -107,7 +108,7 @@ def render_results(inv: Invoice, checks, download_name: str, show_original) -> N
     tab_inv, tab_q, tab_appr, tab_orig = st.tabs(["Invoice", "Questions", "Approval", "Original data"],
                                                  key="results_tabs", on_change="rerun")
     with tab_inv:
-        render_invoice(inv, download_name)
+        render_invoice(inv, download_name, period)
     with tab_q:
         render_exceptions(inv)
     with tab_appr:
@@ -116,7 +117,7 @@ def render_results(inv: Invoice, checks, download_name: str, show_original) -> N
         show_original()
 
 
-def render_invoice(inv: Invoice, download_name: str = "draft_invoice.csv") -> None:
+def render_invoice(inv: Invoice, download_name: str = "draft_invoice.csv", period=None) -> None:
     billed = inv.tier_counts[Tier.firm] + inv.tier_counts[Tier.assumed]
     c1, c2, c3, c4 = st.columns([2, 1, 1, 1])   # the total needs the most room
     c1.metric("Draft total", aud(inv.draft_total))
@@ -158,5 +159,11 @@ def render_invoice(inv: Invoice, download_name: str = "draft_invoice.csv") -> No
             "Note": md_escape(" ".join(l.notes)),
         } for l in inv.duplicates]).set_index("Row"), alt="Duplicate entries left out of the invoice")
 
-    st.download_button("Download draft as CSV", invoice_csv(inv), file_name=download_name,
-                       mime="text/csv", icon=":material/download:")
+    pdf_col, csv_col, _ = st.columns([1, 1, 3])
+    appr = approval.current(st.session_state.get("approval"), inv)
+    start, end = period if period else (None, None)
+    pdf_col.download_button("Download draft as PDF", invoice_pdf(inv, start, end, appr),
+                            file_name=download_name.rsplit(".", 1)[0] + ".pdf", mime="application/pdf",
+                            icon=":material/picture_as_pdf:")
+    csv_col.download_button("Download draft as CSV", invoice_csv(inv), file_name=download_name,
+                            mime="text/csv", icon=":material/download:")
