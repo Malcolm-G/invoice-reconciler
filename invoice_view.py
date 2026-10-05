@@ -61,7 +61,6 @@ def render_exceptions(inv: Invoice) -> None:
         return
     st.caption("These questions would clear the held lines. A person needs to answer them; "
                "until then those lines are not billed.")
-    st.warning("ASSUMPTION: who answers each kind of question is our guess. Please confirm with the business.")
     for owner, qs in group_by_owner(questions).items():
         st.markdown(f"**{owner}** ({len(qs)})")
         show_also = any(q.other_reasons for q in qs)   # nothing to show: keep the table simple

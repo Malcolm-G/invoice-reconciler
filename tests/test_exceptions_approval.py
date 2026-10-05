@@ -247,5 +247,5 @@ def test_ui_approval_flow(monkeypatch):
 
 def test_ui_exceptions_tab_lists_owners(monkeypatch):
     at = demo_app(monkeypatch)
-    assert any("ASSUMPTION" in w.value for w in at.warning)
+    assert not any("ASSUMPTION" in w.value for w in at.warning)        # the owner note was removed from the page
     assert any("Questions to answer (7)" in s.value for s in at.subheader)
